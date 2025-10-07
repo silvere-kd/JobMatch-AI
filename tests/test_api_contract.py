@@ -24,9 +24,9 @@ async def test_create_and_poll_run(monkeypatch):
     async def _noop_enqueue_run(*args, **kwargs):
         return None
 
-    import backend.app.core.queue as queue_mod
+    import backend.app.api.routes as routes_mod
 
-    monkeypatch.setattr(queue_mod, "enqueue_run", _noop_enqueue_run)
+    monkeypatch.setattr(routes_mod, "enqueue_run", _noop_enqueue_run)
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

@@ -19,7 +19,7 @@ async def enqueue_run(run_id: str):
 async def run_match_job(ctx, run_id: str):
     ensure_dirs()
     # Do all heavy work here (worker process with its own loop)
-    with get_session() as s:  # type: Session
+    with get_session() as s:
         run = s.get(Run, run_id)
         if not run:
             return

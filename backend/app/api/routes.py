@@ -30,7 +30,7 @@ async def create_run(req: RunRequest) -> RunResponse:
         ).encode("utf-8")
     ).hexdigest()
 
-    with get_session() as s:  # type: Session
+    with get_session() as s:
         existing = (
             s.execute(
                 select(Run)
