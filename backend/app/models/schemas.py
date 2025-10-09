@@ -1,5 +1,4 @@
 # backend/app/models/schemas.py
-
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -20,6 +19,7 @@ class ArtifactMeta(BaseModel):
     name: str
     kind: str
     mime: str
+    size_bytes: int | None = None
 
 
 class RunStatusResponse(BaseModel):

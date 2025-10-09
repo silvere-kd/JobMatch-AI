@@ -11,6 +11,7 @@ services:
     environment:
       PYTHONPATH: /app
       REDIS_URL: redis://redis:6379/0
+      DB_BOOTSTRAP: alembic
     volumes:
       - ./:/app
       - ./data:/app/data
@@ -28,6 +29,7 @@ services:
     environment:
       PYTHONPATH: /app
       REDIS_URL: redis://redis:6379/0
+      DB_BOOTSTRAP: alembic
     volumes:
       - ./:/app
       - ./data:/app/data

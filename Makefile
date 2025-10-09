@@ -39,3 +39,9 @@ lint:
 
 typecheck:
 	mypy backend
+
+migrate:
+	alembic upgrade head
+
+stamp:
+	alembic stamp head

@@ -14,10 +14,16 @@ from backend.app.storage.models import Run, RunStatus
 
 router = APIRouter()
 
+MAX_LEN = 2_000_000  # ~2MB chars
+
 
 @router.post("/runs", response_model=RunResponse, status_code=202)
 async def create_run(req: RunRequest) -> RunResponse:
     """Queue a new run. FastAPI will validate the body into RunRequest automatically."""
+
+    if len(req.resume_text) > MAX_LEN or len(req.jd_text) > MAX_LEN:
+        raise HTTPException(status_code=413, detail="payload too large")
+
     ensure_dirs()
 
     # Simple idempotency hash
@@ -70,7 +76,7 @@ async def get_run(run_id: str) -> RunStatusResponse:
         artifacts = []
         if run.status == RunStatus.succeeded:
             artifacts = [
-                ArtifactMeta(name=a.name, kind=a.kind, mime=a.mime)
+                ArtifactMeta(name=a.name, kind=a.kind, mime=a.mime, size_bytes=a.size_bytes)
                 for a in list_artifacts_for_run(s, run_id)
             ]
 
@@ -85,7 +91,11 @@ async def list_artifacts(run_id: str):
         run = s.get(Run, run_id)
         if not run:
             raise HTTPException(status_code=404, detail="run not found")
-        files = [a.name for a in list_artifacts_for_run(s, run_id)]
+        arts = list_artifacts_for_run(s, run_id)
+        files = [
+            {"name": a.name, "kind": a.kind, "mime": a.mime, "size_bytes": a.size_bytes}
+            for a in arts
+        ]
         return {"run_id": run_id, "files": files}
 
 
@@ -98,5 +108,10 @@ async def get_artifact(run_id: str, name: str):
         arts = list_artifacts_for_run(s, run_id)
         for a in arts:
             if a.name == name:
-                return FileResponse(a.path, media_type=a.mime, filename=a.name)
+                # Serve with content-disposition for nice filename in downloads
+                return FileResponse(
+                    a.path,
+                    media_type=a.mime,
+                    filename=a.name,
+                )
     raise HTTPException(status_code=404, detail="artifact not found")
